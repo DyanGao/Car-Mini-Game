@@ -1,5 +1,6 @@
 /* eslint-disable react/no-unknown-property */
 import { Suspense, useEffect } from "react";
+import PropTypes from 'prop-types';
 import { Environment, OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import Track from './Track'
 import Ground from "./Ground";
@@ -8,7 +9,7 @@ import { useGameContext } from './context/GameContext';
 import { GAME_CONSTANTS } from './constants/game';
 import { CAMERA_CONSTANTS } from './constants/physics';
 
-const Scene = () => {
+const Scene = ({ onSceneReady }) => {
   const { thirdPerson, cameraPosition, toggleCamera } = useGameContext();
 
   useEffect(() => {
@@ -22,8 +23,19 @@ const Scene = () => {
     return () => window.removeEventListener('keydown', keydownHandler);
   }, [toggleCamera])
 
+  // Notify parent when scene is ready
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (onSceneReady) {
+        onSceneReady();
+      }
+    }, 2000); // Give more time for scene to fully render
+
+    return () => clearTimeout(timer);
+  }, [onSceneReady]);
+
   return (
-    <Suspense fallback={false}>
+    <Suspense fallback={null}>
       
       <Environment 
         preset={GAME_CONSTANTS.ENVIRONMENT.PRESET}
@@ -62,5 +74,9 @@ const Scene = () => {
     </Suspense>
   )
 }
+
+Scene.propTypes = {
+  onSceneReady: PropTypes.func,
+};
 
 export default Scene
