@@ -5,6 +5,7 @@ import './Loading.css';
 const Loading = ({ onLoadingComplete, fadeOut, sceneReady }) => {
   const [progress, setProgress] = useState(0);
   const [loadingText, setLoadingText] = useState('Loading...');
+  const [loadingComplete, setLoadingComplete] = useState(false);
 
   useEffect(() => {
     const loadingSteps = [
@@ -23,7 +24,8 @@ const Loading = ({ onLoadingComplete, fadeOut, sceneReady }) => {
         const step = loadingSteps[currentStep];
         setLoadingText(step.text);
         
-        const stepProgress = 100 / loadingSteps.length;
+        // Progress only goes to 90% during loading steps, reserve 10% for scene ready
+        const stepProgress = 90 / loadingSteps.length;
         const targetProgress = (currentStep + 1) * stepProgress;
         
         const progressInterval = setInterval(() => {
@@ -37,12 +39,9 @@ const Loading = ({ onLoadingComplete, fadeOut, sceneReady }) => {
             if (currentStep < loadingSteps.length) {
               setTimeout(updateLoading, 100);
             } else {
-              // Loading steps complete, now wait for scene to be ready
-              setLoadingText('Ready to race!');
-              setProgress(100);
-              setTimeout(() => {
-                onLoadingComplete();
-              }, 500);
+              // Loading steps complete, wait for scene
+              setLoadingComplete(true);
+              setLoadingText('Waiting for scene...');
             }
           }
         }, 20);
@@ -55,14 +54,29 @@ const Loading = ({ onLoadingComplete, fadeOut, sceneReady }) => {
     return () => {
       clearTimeout(timer);
     };
-  }, [onLoadingComplete]);
+  }, []);
 
-  // Update loading text when scene is ready
+  // Handle scene ready and final completion
   useEffect(() => {
-    if (sceneReady && progress === 100) {
+    if (loadingComplete && sceneReady) {
       setLoadingText('Ready to race!');
+      
+      // Complete the progress bar to 100%
+      const finalProgressInterval = setInterval(() => {
+        setProgress(prevProgress => {
+          const newProgress = prevProgress + 2;
+          if (newProgress >= 100) {
+            clearInterval(finalProgressInterval);
+            setTimeout(() => {
+              onLoadingComplete();
+            }, 500);
+            return 100;
+          }
+          return newProgress;
+        });
+      }, 20);
     }
-  }, [sceneReady, progress]);
+  }, [loadingComplete, sceneReady, onLoadingComplete]);
 
   return (
     <div className={`loading-screen ${fadeOut ? 'fade-out' : ''}`}>
