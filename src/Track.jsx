@@ -1,19 +1,21 @@
+/* eslint-disable react/no-unknown-property */
 import { useLoader } from "@react-three/fiber";
 import { useEffect } from "react";
 import { TextureLoader } from "three/src/loaders/TextureLoader";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import ColliderBox from "./ColliderBox";
 import Ramp from "./Ramp";
+import { GAME_CONSTANTS } from './constants/game';
 
 const Track = () => {
   const track = useLoader(
     GLTFLoader,
-    '/models/track.glb'
+    GAME_CONSTANTS.MODELS.TRACK
   );
 
   const colorMap = useLoader(
     TextureLoader,
-    '/textures/track.png'
+    GAME_CONSTANTS.TEXTURES.TRACK
   );
 
   useEffect(() => {

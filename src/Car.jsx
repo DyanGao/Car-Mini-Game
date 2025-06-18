@@ -1,30 +1,37 @@
 /* eslint-disable react/no-unknown-property */
 import { useBox, useRaycastVehicle } from '@react-three/cannon';
-import { useFrame, useLoader } from '@react-three/fiber'
+import { useLoader } from '@react-three/fiber'
 import { useEffect, useRef } from 'react'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { useWheels } from './useWheels';
 import { WheelDebug } from './WheelDebug';
 import useControls from './useControls';
-import { Quaternion, Vector3 } from 'three';
+import { useGameContext } from './context/GameContext';
+import { useGameCamera } from './hooks/useGameCamera';
+import { PHYSICS_CONSTANTS } from './constants/physics';
+import { GAME_CONSTANTS } from './constants/game';
 
-const Car = ({thirdPerson}) => {
+const Car = () => {
+  const { thirdPerson } = useGameContext();
+  
   let mesh = useLoader(
     GLTFLoader,
-    '/models/car.glb'
+    GAME_CONSTANTS.MODELS.CAR
   ).scene;
 
-  const position = [-1.5, 0.5, 3];
-  const width = 0.15;
-  const height = 0.07;
-  const front = 0.15;
-  const wheelRadius = 0.05;
+  const position = PHYSICS_CONSTANTS.INITIAL_POSITION;
+  const width = PHYSICS_CONSTANTS.CHASSIS_WIDTH;
+  const height = PHYSICS_CONSTANTS.CHASSIS_HEIGHT;
+  const front = PHYSICS_CONSTANTS.CHASSIS_FRONT;
+  const wheelRadius = PHYSICS_CONSTANTS.WHEEL_RADIUS;
 
   const chassisBodyArgs = [width, height, front * 2];
   const [chassisBody, chassisApi] = useBox(() => ({
     args: chassisBodyArgs,
-    mass: 150,
+    mass: PHYSICS_CONSTANTS.CAR_MASS,
     position,
+    linearDamping: 0.1, // Light damping for natural movement
+    angularDamping: 0.3, // Moderate angular damping
   }),
     useRef(null),
   );
@@ -39,44 +46,16 @@ const Car = ({thirdPerson}) => {
   );
 
   useControls(vehicleApi, chassisApi);
-
-  useFrame((state) => {
-    if (!thirdPerson) return;
-
-    let position = new Vector3(0, 0, 0);
-    position.setFromMatrixPosition(chassisBody.current.matrixWorld);
-
-    let quaternion = new Quaternion(0, 0, 0);
-    quaternion.setFromRotationMatrix(chassisBody.current.matrixWorld);
-
-    let wDir = new Vector3(0, 0, -1);
-    wDir.applyQuaternion(quaternion);
-    wDir.normalize();
-
-    let cameraPosition = position.clone().add(
-      wDir.clone().multiplyScalar(-1).add(
-        new Vector3(0, 0.3, 0)
-      )
-    );
-
-    state.camera.position.copy(cameraPosition);
-    state.camera.lookAt(position);
-  });
+  useGameCamera(chassisBody, thirdPerson);
 
   useEffect(() => {
-    mesh.scale.set(0.0012, 0.0012, 0.0012)
-    mesh.children[0].position.set(-365, -18, -67);
+    mesh.scale.set(GAME_CONSTANTS.CAR_SCALE, GAME_CONSTANTS.CAR_SCALE, GAME_CONSTANTS.CAR_SCALE);
+    mesh.children[0].position.set(...GAME_CONSTANTS.CAR_MODEL_OFFSET);
   },[mesh]);
 
   return (
     <group ref={vehicle} name='vehicle'>
-    {/* <primitive object={mesh} rotation-y={Math.PI} /> */}
-      {/* <mesh ref={chassisBody}>
-        <meshBasicMaterial transparent={ true } opacity={0.3} />
-        <boxGeometry args={chassisBodyArgs}/>
-      </mesh> */}
-
-      <group ref={chassisBody} name='chassicBody'>
+      <group ref={chassisBody} name='chassisBody'>
         <primitive object={mesh} rotation-y={Math.PI} position={[0,-0.09, 0]} />
       </group>
 

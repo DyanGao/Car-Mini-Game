@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { useCompoundBody } from "@react-three/cannon";
+import { PHYSICS_CONSTANTS } from "./constants/physics";
 
 export const useWheels = (width, height, front, radius) => {
   const wheels = [useRef(null), useRef(null), useRef(null), useRef(null)];
@@ -8,15 +9,15 @@ export const useWheels = (width, height, front, radius) => {
     radius,
     directionLocal: [0, -1, 0],
     axleLocal: [1, 0, 0],
-    suspensionStiffness: 60,
-    suspensionRestLength: 0.1,
-    frictionSlip: 5,
-    dampingRelaxation: 2.3,
-    dampingCompression: 4.4,
-    maxSuspensionForce: 100000,
-    rollInfluence: 0.01,
-    maxSuspensionTravel: 0.1,
-    customSlidingRotationalSpeed: -30,
+    suspensionStiffness: PHYSICS_CONSTANTS.SUSPENSION_STIFFNESS,
+    suspensionRestLength: PHYSICS_CONSTANTS.SUSPENSION_REST_LENGTH,
+    frictionSlip: PHYSICS_CONSTANTS.FRICTION_SLIP * 1.5, // Increase friction for better stability
+    dampingRelaxation: PHYSICS_CONSTANTS.DAMPING_RELAXATION,
+    dampingCompression: PHYSICS_CONSTANTS.DAMPING_COMPRESSION,
+    maxSuspensionForce: PHYSICS_CONSTANTS.MAX_SUSPENSION_FORCE,
+    rollInfluence: 0.05, // Increase roll influence for better stability
+    maxSuspensionTravel: PHYSICS_CONSTANTS.MAX_SUSPENSION_TRAVEL,
+    customSlidingRotationalSpeed: PHYSICS_CONSTANTS.CUSTOM_SLIDING_ROTATIONAL_SPEED,
     useCustomSlidingRotationalSpeed: true,
   };
 

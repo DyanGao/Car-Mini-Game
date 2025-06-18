@@ -1,9 +1,11 @@
+/* eslint-disable react/no-unknown-property */
 import { usePlane } from '@react-three/cannon';
 import { MeshReflectorMaterial } from '@react-three/drei';
 import { useLoader } from '@react-three/fiber';
 import { useEffect, useRef } from 'react';
 import { BufferAttribute  } from 'three';
 import { TextureLoader } from 'three/src/loaders/TextureLoader';
+import { GAME_CONSTANTS } from './constants/game';
 
 const Ground = () => {
   const [ref] = usePlane(() => ({
@@ -14,15 +16,15 @@ const Ground = () => {
   )
   const gridMap = useLoader(
     TextureLoader,
-    '/textures/grid.png'
+    GAME_CONSTANTS.TEXTURES.GRID
   );
   const aoMap = useLoader(
     TextureLoader,
-    '/textures/ground-ao.png'
+    GAME_CONSTANTS.TEXTURES.GROUND_AO
   );
   const alphaMap = useLoader(
     TextureLoader,
-    '/textures/alpha-map.png'
+    GAME_CONSTANTS.TEXTURES.ALPHA_MAP
   );
 
   useEffect(() => {
@@ -67,24 +69,24 @@ const Ground = () => {
         aoMap={aoMap}
         alphaMap={alphaMap}
         transparent={true}
-        color={[0.5, 0.5, 0.5]}
-        envMapIntensity={0.35}
-        metalness={0.05}
-        roughness={0.4}
+        color={GAME_CONSTANTS.GROUND_MATERIAL.COLOR}
+        envMapIntensity={GAME_CONSTANTS.GROUND_MATERIAL.ENV_MAP_INTENSITY}
+        metalness={GAME_CONSTANTS.GROUND_MATERIAL.METALNESS}
+        roughness={GAME_CONSTANTS.GROUND_MATERIAL.ROUGHNESS}
         
         dithering={true}
-        blur={[1024, 512]}
-        mixBlur={3}
-        mixStrength={30}
-        mixContrast={1}
-        resolution={1024}
-        mirror={0}
-        depthScale={0}
-        minDepthThreshold={0.9}
+        blur={[128, 128]}        // More blur for softer sand look
+        mixBlur={0.5}            // Very light blur mixing
+        mixStrength={GAME_CONSTANTS.GROUND_MATERIAL.MIX_STRENGTH}
+        mixContrast={GAME_CONSTANTS.GROUND_MATERIAL.MIX_CONTRAST}
+        resolution={GAME_CONSTANTS.GROUND_MATERIAL.RESOLUTION}
+        mirror={GAME_CONSTANTS.GROUND_MATERIAL.MIRROR}
+        depthScale={0.2}         // Minimal depth for flat sand
+        minDepthThreshold={0.2}  // Very wide depth range
         maxDepthThreshold={1}
-        depthToBlurRatioBias={0.25}
+        depthToBlurRatioBias={0.05} // Minimal depth-based blur
         debug={0}
-        reflectorOffset={0.02}
+        reflectorOffset={0.005}  // Very small offset for sand
       />
       </mesh>
     </>

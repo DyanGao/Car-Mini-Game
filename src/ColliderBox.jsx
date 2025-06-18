@@ -1,7 +1,7 @@
+/* eslint-disable react/no-unknown-property */
+import PropTypes from 'prop-types';
 import { useBox } from "@react-three/cannon";
-
-//const debug = true;
-const debug = false;
+import { DEBUG_FLAGS } from './constants/physics';
 
 const ColliderBox = ({ position, scale }) => {
   useBox(() => ({
@@ -11,7 +11,7 @@ const ColliderBox = ({ position, scale }) => {
   }));
 
   return (
-    debug && (
+    DEBUG_FLAGS.SHOW_COLLIDERS && (
       <mesh position={position}>
         <boxGeometry args={scale} />
         <meshBasicMaterial transparent={ true } opacity={0.25} />
@@ -19,5 +19,10 @@ const ColliderBox = ({ position, scale }) => {
     )
   )
 }
+
+ColliderBox.propTypes = {
+  position: PropTypes.arrayOf(PropTypes.number).isRequired,
+  scale: PropTypes.arrayOf(PropTypes.number).isRequired,
+};
 
 export default ColliderBox
